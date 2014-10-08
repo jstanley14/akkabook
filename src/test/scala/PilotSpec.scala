@@ -3,6 +3,7 @@ import akka.testkit.{TestProbe, ImplicitSender, TestKit}
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
 import org.scalatest.{Matchers, WordSpecLike}
+import zzz.akka.avionics.Pilots.{CopilotReference, RequestCopilot}
 import zzz.akka.avionics._
 import scala.concurrent.Await
 import scala.concurrent.duration._
@@ -28,10 +29,11 @@ class PilotsSpec extends TestKit(ActorSystem("PilotsSpec",
   import Plane._
 
   def nilActor: ActorRef = TestProbe().ref
-  val pilotPath = s"/user/TestPilots/$pilotName"
-  val copilotPath = s"/user/TestPilots/$copilotName"
+  def pilotPath(actSys: String) = s"/user/$actSys/$pilotName"
+  def copilotPath(actSys: String) = s"/user/$actSys/$copilotName"
+  def autopilotPath(actSys: String) = s"/user/$actSys/Autopilot"
 
-  def pilotsReadyToGo(): ActorRef = {
+  def pilotsReadyToGo(systemName: String): ActorRef = {
     implicit val askTimeout = Timeout(4.seconds)
     val a = system.actorOf(
       Props(new IsolatedStopSupervisor with OneForOneStrategyFactory {
@@ -39,19 +41,48 @@ class PilotsSpec extends TestKit(ActorSystem("PilotsSpec",
           context.actorOf(Props[FakePilot], pilotName)
           context.actorOf(Props(
             new Copilot(testActor, nilActor, nilActor)), copilotName)
+          context.actorOf(Props(new Autopilot(testActor)), "Autopilot")
         }
-      }), "TestPilots")
+      }), systemName)
     Await.result(a ? IsolatedLifeCycleSupervisor.WaitForStart, 3.seconds)
-    system.actorFor(copilotPath) ! Pilots.ReadyToGo
+    system.actorFor(copilotPath(systemName)) ! Pilots.ReadyToGo
+    a
+  }
+
+  def autopilotTestSetup(systemName: String): ActorRef = {
+    implicit val askTimeout = Timeout(4.seconds)
+    val a = system.actorOf(
+      Props(new IsolatedStopSupervisor with OneForOneStrategyFactory {
+        def childStarter(): Unit = {
+          context.actorOf(Props[FakePilot], pilotName)
+          context.actorOf(Props(
+            new Copilot(testActor, nilActor, nilActor)), copilotName)
+          context.actorOf(Props(new Autopilot(testActor)), "Autopilot")
+        }
+      }), systemName)
+    Await.result(a ? IsolatedLifeCycleSupervisor.WaitForStart, 3.seconds)
+    system.actorFor(autopilotPath(systemName)) ! Pilots.ReadyToGo
     a
   }
 
   "Copilot" should {
     "take control when the Pilot dies" in {
-      pilotsReadyToGo()
-      system.actorFor(pilotPath) ! PoisonPill
+      pilotsReadyToGo("CopilotTest")
+      system.actorFor(pilotPath("CopilotTest")) ! PoisonPill
       expectMsg(GiveMeControl)
-      lastSender should be (system.actorFor(copilotPath))
+      lastSender should be (system.actorFor(copilotPath("CopilotTest")))
+    }
+  }
+
+  "Autopilot" should {
+    "take control when the Copilot dies" in {
+      autopilotTestSetup("AutopilotTest")
+      expectMsg(RequestCopilot)
+      lastSender should be (system.actorFor(autopilotPath("AutopilotTest")))
+      lastSender ! CopilotReference(system.actorFor(copilotPath("AutopilotTest")))
+      system.actorFor(copilotPath("AutopilotTest")) ! PoisonPill
+      expectMsg(GiveMeControl)
+      lastSender should be (system.actorFor(autopilotPath("AutopilotTest")))
     }
   }
 }
