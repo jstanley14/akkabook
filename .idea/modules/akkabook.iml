@@ -5,7 +5,6 @@
       <configuration>
         <option name="compilerLibraryLevel" value="Project" />
         <option name="compilerLibraryName" value="SBT:: scala-compiler-bundle:2.11.2" />
-        <option name="languageLevel" value="Scala 2.11" />
       </configuration>
     </facet>
   </component>
@@ -29,8 +28,8 @@
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="SBT: com.typesafe:config:1.2.1" level="project" />
     <orderEntry type="library" name="SBT: com.typesafe.akka:akka-actor_2.11:2.3.6" level="project" />
-    <orderEntry type="library" name="SBT: org.scala-lang:scala-library:2.11.2" level="project" />
     <orderEntry type="library" name="SBT: com.typesafe.akka:akka-testkit_2.11:2.3.6" level="project" />
+    <orderEntry type="library" name="SBT: org.scala-lang:scala-library:2.11.2" level="project" />
     <orderEntry type="library" name="SBT: org.scala-lang:scala-reflect:2.11.2" level="project" />
     <orderEntry type="library" name="SBT: org.scala-lang.modules:scala-xml_2.11:1.0.2" level="project" />
     <orderEntry type="library" name="SBT: org.scalatest:scalatest_2.11:2.2.1" level="project" />
