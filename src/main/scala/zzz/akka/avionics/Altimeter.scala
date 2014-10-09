@@ -41,6 +41,8 @@ class Altimeter extends Actor with ActorLogging { this: EventSource =>
     case AltitiudeCalculated(tick, altCng) =>
       altitude += altCng
       sendEvent(AltitudeUpdate(altitude))
+
+
   }
 
   def receive = eventSourceReceive orElse altimeterReceive

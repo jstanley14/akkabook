@@ -1,9 +1,11 @@
 import akka.actor._
-import akka.testkit.{TestProbe, ImplicitSender, TestKit}
+import akka.testkit.{TestActorRef, TestProbe, ImplicitSender, TestKit}
 import akka.util.Timeout
 import com.typesafe.config.ConfigFactory
 import org.scalatest.{Matchers, WordSpecLike}
-import zzz.akka.avionics.Pilots.{CopilotReference, RequestCopilot}
+import zzz.akka.avionics.DrinkingBehavior.{FeelingTipsy, FeelingLikeZaphod}
+import zzz.akka.avionics.FlyingBehavior.{NewBankCalculator, NewElevatorCalculator}
+import zzz.akka.avionics.Pilots.{ReadyToGo, CopilotReference, RequestCopilot}
 import zzz.akka.avionics._
 import scala.concurrent.Await
 import scala.concurrent.duration._
@@ -27,6 +29,14 @@ class PilotsSpec extends TestKit(ActorSystem("PilotsSpec",
                  with ImplicitSender with WordSpecLike with Matchers {
   import PilotsSpec._
   import Plane._
+
+
+  def makePilot() = {
+    val a = TestActorRef[Pilot](
+      new Pilot(nilActor, nilActor, nilActor, nilActor) with DrinkingProvider
+                                                        with FlyingProvider)
+    (a, a.underlyingActor)
+  }
 
   def nilActor: ActorRef = TestProbe().ref
   def pilotPath(actSys: String) = s"/user/$actSys/$pilotName"
@@ -63,6 +73,33 @@ class PilotsSpec extends TestKit(ActorSystem("PilotsSpec",
     Await.result(a ? IsolatedLifeCycleSupervisor.WaitForStart, 3.seconds)
     system.actorFor(autopilotPath(systemName)) ! Pilots.ReadyToGo
     a
+  }
+
+  "Pilot.becomeZaphod" should {
+    "send new zaphodCalcElevator and zaphodCalcAilerons to FlyingBehavior" in {
+      val (ref, a) = makePilot()
+      a.context.become(a.sober(nilActor, testActor))
+      ref ! FeelingLikeZaphod
+      expectMsgAllOf(
+        NewElevatorCalculator(Pilot.zaphodCalcElevator),
+        NewBankCalculator(Pilot.zaphodCalcAilerons)
+      )
+    }
+  }
+
+  "Pilot.becomeTipsy" should {
+    "send new tipsyCalcElevator and tipsyCalcAilerons to FlyingBehavior" in {
+      val (ref, a) = makePilot()
+      a.context.become(a.sober(nilActor, testActor))
+      ref ! FeelingTipsy
+      expectMsgAllClassOf(classOf[NewElevatorCalculator],
+        classOf[NewBankCalculator]) foreach {
+          case NewElevatorCalculator(f) =>
+            f should be (Pilot.tipsyCalcElevator)
+          case NewBankCalculator(f) =>
+            f should be (Pilot.tipsyCalcAilerons)
+      }
+    }
   }
 
   "Copilot" should {

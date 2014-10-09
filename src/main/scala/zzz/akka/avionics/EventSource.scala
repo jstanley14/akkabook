@@ -16,10 +16,13 @@ trait ProductionEventSource extends EventSource { this: Actor =>
   import EventSource._
 
   var listeners = Vector.empty[ActorRef]
-  def sendEvent[T](event: T): Unit = listeners foreach { _ ! event }
+  def sendEvent[T](event: T): Unit = {
+    listeners foreach { _ ! event }
+  }
 
   def eventSourceReceive: Receive = {
     case RegisterListener(listener) =>
+      println(s"$self registered ${listener.path} -=-------------------------------")
       listeners = listeners :+ listener
     case UnregisterListener(listener) =>
       listeners = listeners filter { _ != listener }

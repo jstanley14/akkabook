@@ -14,21 +14,25 @@ object Avionics {
   val plane = system.actorOf(Props(Plane()), "Plane")
 
   def main(args: Array[String]) {
-    val control = Await.result((plane ? Plane.GiveMeControl).mapTo[Controls],
-                               5.seconds).controls
+    println("Hi")
 
-    system.scheduler.scheduleOnce(200.millis) {
-                         control ! ControlSurfaces.StickBack(1f) }
+    system.scheduler.scheduleOnce(20.seconds) { system.shutdown() }
 
-    system.scheduler.scheduleOnce(1.seconds) {
-                         control ! ControlSurfaces.StickBack(0f) }
-
-    system.scheduler.scheduleOnce(3.seconds) {
-                         control ! ControlSurfaces.StickBack(0.5f) }
-
-    system.scheduler.scheduleOnce(4.seconds) {
-                         control ! ControlSurfaces.StickBack(0f) }
-
-    system.scheduler.scheduleOnce(5.seconds) { system.shutdown() }
+//    val control = Await.result((plane ? Plane.GiveMeControl).mapTo[Controls],
+//                               5.seconds).controls
+//
+//    system.scheduler.scheduleOnce(200.millis) {
+//                         control ! ControlSurfaces.StickBack(1f) }
+//
+//    system.scheduler.scheduleOnce(1.seconds) {
+//                         control ! ControlSurfaces.StickBack(0f) }
+//
+//    system.scheduler.scheduleOnce(3.seconds) {
+//                         control ! ControlSurfaces.StickBack(0.5f) }
+//
+//    system.scheduler.scheduleOnce(4.seconds) {
+//                         control ! ControlSurfaces.StickBack(0f) }
+//
+//    system.scheduler.scheduleOnce(5.seconds) { system.shutdown() }
   }
 }
