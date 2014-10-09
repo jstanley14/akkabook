@@ -57,7 +57,6 @@ class Plane extends Actor with ActorLogging { this: AltimeterProvider
   def startPeople(): Unit = {
     val plane = self
 
- //   val controls = actorForControls("ControlSurfaces")
     val autopilot = actorForControls("Autopilot")
     val altimeter = actorForControls("Altimeter")
     val heading = actorForControls("HeadingIndicator")

@@ -30,6 +30,7 @@ class Altimeter extends Actor with ActorLogging { this: EventSource =>
 
   def altimeterReceive: Receive = {
     case RateChange(amount) =>
+      log info s"Altimeter received RateChange with amount $amount"
       rateOfClimb = amount.min(1.0f).max(-1.0f) * maxRateOfClimb
       log info s"Altimeter changed rate of climb to $rateOfClimb"
 

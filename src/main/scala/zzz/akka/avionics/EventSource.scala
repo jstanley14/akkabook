@@ -22,7 +22,6 @@ trait ProductionEventSource extends EventSource { this: Actor =>
 
   def eventSourceReceive: Receive = {
     case RegisterListener(listener) =>
-      println(s"$self registered ${listener.path} -=-------------------------------")
       listeners = listeners :+ listener
     case UnregisterListener(listener) =>
       listeners = listeners filter { _ != listener }

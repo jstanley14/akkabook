@@ -36,7 +36,7 @@ object FlyingBehavior {
                         status: CourseStatus) extends Data
 
   case class Fly(target: CourseTarget)
-  case class NewWaypoint(target: CourseTarget)
+  case class NewWayPoint(target: CourseTarget)
 
   case class NewElevatorCalculator(f: Calculator)
   case class NewBankCalculator(f: Calculator)
@@ -126,8 +126,8 @@ class FlyingBehavior(plane: ActorRef,
     case Event(NewElevatorCalculator(f), d: FlightData) =>
       stay using d.copy(elevCalc = f)
 
-    case Event(NewWaypoint(targ), d: FlightData) =>
-      log info s"!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! $targ"
+    case Event(NewWayPoint(targ), d: FlightData) =>
+      log info s"new waypoint $targ"
       stay using d.copy(target = targ)
 
     case Event(Fly(targ), d: FlightData) =>
