@@ -33,8 +33,8 @@ class PilotsSpec extends TestKit(ActorSystem("PilotsSpec",
 
   def makePilot() = {
     val a = TestActorRef[Pilot](
-      new Pilot(nilActor, nilActor, nilActor, nilActor) with DrinkingProvider
-                                                        with FlyingProvider)
+      new Pilot(nilActor, nilActor, nilActor, nilActor, nilActor) with DrinkingProvider
+                                                                  with FlyingProvider)
     (a, a.underlyingActor)
   }
 

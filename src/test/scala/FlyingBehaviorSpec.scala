@@ -16,8 +16,9 @@ class FlyingBehaviorSpec extends TestKit(ActorSystem("FlyingBehaviorSpec"))
 
   def fsm(plane: ActorRef = nilActor,
           heading: ActorRef = nilActor,
-          altimeter: ActorRef = nilActor) = {
-    TestFSMRef(new FlyingBehavior(plane, heading, altimeter))
+          altimeter: ActorRef = nilActor,
+          wayPoints: ActorRef = nilActor) = {
+    TestFSMRef(new FlyingBehavior(plane, heading, altimeter, wayPoints))
   }
 
   "FlyingBehavior" should {
